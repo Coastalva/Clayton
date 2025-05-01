@@ -78,7 +78,8 @@
     </div>
 
     <script>
-        const employeeListDiv = document.getElementById('employeeList');
+     const scriptUrl = 'https://script.google.com/macros/s/AKfycbwEklej5fyTrSb1RYRyunDwkg7ZnB9Bw0H-V3K8Y7fQwQcI4b5Urd6V50pjmYsZoEoW6w/exec';
+const employeeListDiv = document.getElementById('employeeList');
 const newEmployeeInput = document.getElementById('newEmployeeInput');
 const addEmployeeBtn = document.getElementById('addEmployeeBtn');
 const videoElement = document.getElementById('video');
@@ -194,7 +195,7 @@ registerBtn.addEventListener('click', function() {
                 horaEntrada[employeeName] = new Date().toISOString(); // Registrar hora de entrada
             }
 
-            fetch('https://script.google.com/macros/s/AKfycbwI8KNkZ0vVWzJzgcDkFJfs8vwRsGPXUQ3NQbT2NtAiPTzFE-fKldntuXYFsvdIirwwEg/exec', { method: 'POST', body: params })
+            fetch(scriptUrl, { method: 'POST', body: params })
                 .then(response => response.json())
                 .then(data => {
                     outputSection.textContent += `Registro para ${employeeName}: ${data.message}\n`;
@@ -230,7 +231,7 @@ registerBtn.addEventListener('click', function() {
                 horaEntrada[employeeName] = new Date().toISOString();
             }
 
-            fetch('https://script.google.com/macros/s/AKfycbwI8KNkZ0vVWzJzgcDkFJfs8vwRsGPXUQ3NQbT2NtAiPTzFE-fKldntuXYFsvdIirwwEg/exec', { method: 'POST', body: params })
+            fetch(scriptUrl, { method: 'POST', body: params })
                 .then(response => response.json())
                 .then(data => {
                     outputSection.textContent += `Registro para ${employeeName}: ${data.message} (sin ubicación)\n`;
