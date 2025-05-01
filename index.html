@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coastal VA Storage - Horario Clayton</title>
     <style>
-        /* Estilos CSS (sin cambios) */
+        /* Estilos CSS para la aplicación */
         body { font-family: 'Segoe UI', sans-serif; }
         .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
         h2 { text-align: center; color: #01487d; }
@@ -26,6 +26,7 @@
 <body>
     <div class="container">
         <h2>Coastal VA Storage - Horario Clayton</h2>
+
         <div class="employee-selection">
             <h3>Empleados:</h3>
             <div id="employeeList">
@@ -37,7 +38,7 @@
                     <input type="checkbox" id="mario" name="empleado" value="Mario Alvarez">
                     <label for="mario">Mario Alvarez</label>
                 </div>
-            </div>
+                </div>
         </div>
 
         <div class="add-employee">
@@ -77,7 +78,7 @@
     </div>
 
     <script>
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbwEklej5fyTrSb1RYRyunDwkg7ZnB9Bw0H-V3K8Y7fQwQcI4b5Urd6V50pjmYsZoEoW6w/exec';
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbxWsm75BScKvTUtzqmBqRENxFkNuH0lhKTbu62rYMFAO5OBqQMfF0uv9LiGRE5v8Uy-zA/exec';
         const employeeListDiv = document.getElementById('employeeList');
         const newEmployeeInput = document.getElementById('newEmployeeInput');
         const addEmployeeBtn = document.getElementById('addEmployeeBtn');
@@ -97,14 +98,8 @@
 
         // Inicializar la cámara trasera
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-            .then(stream => {
-                videoElement.srcObject = stream;
-                console.log('Cámara trasera iniciada con éxito.');
-            })
-            .catch(error => {
-                console.error('Error al acceder a la cámara trasera:', error);
-                alert(`No se pudo acceder a la cámara trasera: ${error.message || error}`);
-            });
+            .then(stream => videoElement.srcObject = stream)
+            .catch(() => alert("No se pudo acceder a la cámara trasera."));
 
 //PEGAR ARRIBA LO COPIADO EN UN BLOCK DE NOTAS 
         // Agregar dinámicamente nuevos empleados
