@@ -230,7 +230,7 @@ registerBtn.addEventListener('click', function() {
                 horaEntrada[employeeName] = new Date().toISOString();
             }
 
-            fetch('https://script.google.com/macros/s/AKfycbzEbzd5_YHO_T7C22z8HCIQ1XfsDsWNcYpgOJcLUhYSMmvpff-Pb3PHKe_PuZZ7taq45A/exec', { method: 'POST', body: params })
+            fetch('https://script.google.com/macros/s/AKfycbypTOLQiLrdMwFkPq5ysCPTgnrWVH9iSlmCVpdsP7P16eXWoAuOrvnRFMyidMoQG6y91w/exec', { method: 'POST', body: params })
                 .then(response => response.json())
                 .then(data => {
                     outputSection.textContent += `Registro para ${employeeName}: ${data.message} (sin ubicación)\n`;
