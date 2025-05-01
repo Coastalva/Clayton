@@ -1,1 +1,253 @@
-<h1> HOLA MUNDO</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coastal VA Storage - Horario Clayton</title>
+    <style>
+        /* Estilos CSS para la aplicación */
+        body { font-family: 'Segoe UI', sans-serif; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        h2 { text-align: center; color: #01487d; }
+        .employee-selection, .add-employee, .camera-section, .journey-type, .project-details, .output { margin-top: 20px; }
+        .employee-option { display: flex; align-items: center; margin-bottom: 10px; }
+        .employee-option input[type="checkbox"] { margin-right: 10px; }
+        #newEmployeeInput { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+        #addEmployeeBtn { padding: 8px 15px; border-radius: 4px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        #video-container { position: relative; width: 100%; max-height: 240px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; }
+        #video { display: block; width: 100%; height: auto; }
+        #captureBtn { padding: 10px 20px; border-radius: 4px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        #journeyType label { margin-right: 15px; }
+        #projectDescription { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; box-sizing: border-box; }
+        #registerBtn { padding: 12px 30px; border-radius: 4px; background-color: #007bff; color: white; border: none; cursor: pointer; font-size: 16px; }
+        #output { margin-top: 20px; padding: 15px; border: 1px solid #eee; border-radius: 4px; background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Coastal VA Storage - Horario Clayton</h2>
+
+        <div class="employee-selection">
+            <h3>Empleados:</h3>
+            <div id="employeeList">
+                <div class="employee-option">
+                    <input type="checkbox" id="andres" name="empleado" value="Andres Garcia">
+                    <label for="andres">Andres Garcia</label>
+                </div>
+                <div class="employee-option">
+                    <input type="checkbox" id="mario" name="empleado" value="Mario Alvarez">
+                    <label for="mario">Mario Alvarez</label>
+                </div>
+                </div>
+        </div>
+
+        <div class="add-employee">
+            <h3>Agregar Nuevo Empleado:</h3>
+            <input type="text" id="newEmployeeInput" placeholder="Nombre del empleado">
+            <button type="button" id="addEmployeeBtn">Agregar</button>
+        </div>
+
+        <div class="camera-section">
+            <h3>Foto del Grupo:</h3>
+            <div id="video-container">
+                <video id="video" autoplay></video>
+            </div>
+            <button type="button" id="captureBtn">Capturar Foto</button>
+            <canvas id="photoCanvas" style="display:none;"></canvas>
+            <input type="hidden" id="photoBase64">
+        </div>
+
+        <div class="journey-type">
+            <h3>Tipo de Jornada:</h3>
+            <label><input type="radio" name="tipo" value="Entrada"> Entrada</label>
+            <label><input type="radio" name="tipo" value="Salida"> Salida</label>
+        </div>
+
+        <div class="project-details" id="projectDetailsSection" style="display: none;">
+            <h3>Detalles del Proyecto (Salida):</h3>
+            <label for="projectName">Nombre del Proyecto:</label>
+            <input type="text" id="projectName" name="projectName">
+            <label for="projectDescription">Descripción del Trabajo:</label>
+            <textarea id="projectDescription" name="projectDescription" rows="3"></textarea>
+        </div>
+
+        <button type="button" id="registerBtn">Registrar</button>
+
+        <div class="output" id="outputSection">
+            </div>
+    </div>
+
+    <script>
+        const employeeListDiv = document.getElementById('employeeList');
+const newEmployeeInput = document.getElementById('newEmployeeInput');
+const addEmployeeBtn = document.getElementById('addEmployeeBtn');
+const videoElement = document.getElementById('video');
+const captureBtn = document.getElementById('captureBtn');
+const photoCanvas = document.getElementById('photoCanvas');
+const photoContext = photoCanvas.getContext('2d');
+const photoBase64Input = document.getElementById('photoBase64');
+const journeyTypeRadios = document.querySelectorAll('input[name="tipo"]');
+const projectDetailsSection = document.getElementById('projectDetailsSection');
+const projectNameInput = document.getElementById('projectName');
+const projectDescriptionTextarea = document.getElementById('projectDescription');
+const registerBtn = document.getElementById('registerBtn');
+const outputSection = document.getElementById('outputSection');
+
+let horaEntrada = {}; // Para almacenar la hora de entrada por empleado
+
+// Inicializar la cámara trasera
+navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(stream => videoElement.srcObject = stream)
+    .catch(() => alert("No se pudo acceder a la cámara trasera."));
+
+// Agregar dinámicamente nuevos empleados
+addEmployeeBtn.addEventListener('click', function() {
+    const newEmployeeName = newEmployeeInput.value.trim();
+    if (newEmployeeName) {
+        const newEmployeeId = newEmployeeName.toLowerCase().replace(/\s+/g, '');
+        const newEmployeeDiv = document.createElement('div');
+        newEmployeeDiv.classList.add('employee-option');
+        newEmployeeDiv.innerHTML = `
+            <input type="checkbox" id="${newEmployeeId}" name="empleado" value="${newEmployeeName}">
+            <label for="${newEmployeeId}">${newEmployeeName}</label>
+        `;
+        employeeListDiv.appendChild(newEmployeeDiv);
+        newEmployeeInput.value = '';
+    }
+});
+
+// Mostrar/ocultar detalles del proyecto al seleccionar "Salida"
+journeyTypeRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+        projectDetailsSection.style.display = this.value === 'Salida' ? 'block' : 'none';
+    });
+});
+
+// Capturar foto
+captureBtn.addEventListener('click', function() {
+    const width = videoElement.videoWidth;
+    const height = videoElement.videoHeight;
+    photoCanvas.width = width;
+    photoCanvas.height = height;
+    photoContext.drawImage(videoElement, 0, 0, width, height);
+    photoBase64Input.value = photoCanvas.toDataURL("image/jpeg");
+    alert('Foto capturada.'); // Puedes mejorar la visualización
+});
+
+// Registrar entrada/salida
+registerBtn.addEventListener('click', function() {
+    const selectedEmployees = Array.from(document.querySelectorAll('input[name="empleado"]:checked'))
+        .map(cb => cb.value);
+    const tipoJornada = document.querySelector('input[name="tipo"]:checked')?.value;
+    const projectName = projectNameInput.value;
+    const projectDescription = projectDescriptionTextarea.value;
+    const fotoBase64 = photoBase64Input.value;
+    const fecha = new Date().toISOString().split('T')[0];
+    const hora = new Date().toLocaleTimeString('es-ES', { hour12: false });
+    const gps = ''; // Obtendremos la ubicación más adelante
+
+    if (!selectedEmployees.length) {
+        alert('Por favor, selecciona al menos un empleado.');
+        return;
+    }
+
+    if (!tipoJornada) {
+        alert('Por favor, selecciona el tipo de jornada (Entrada o Salida).');
+        return;
+    }
+
+    if (tipoJornada === 'Salida' && (!projectName || !projectDescription)) {
+        alert('Por favor, ingresa el nombre y la descripción del proyecto para la salida.');
+        return;
+    }
+
+    if (!fotoBase64) {
+        alert('Por favor, captura una foto.');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(pos => {
+        const gpsCoords = `${pos.coords.latitude.toFixed(4)},${pos.coords.longitude.toFixed(4)}`;
+
+        selectedEmployees.forEach(employeeName => {
+            const params = new URLSearchParams();
+            params.append('Nombre', employeeName);
+            params.append('TipoJornada', tipoJornada);
+            params.append('Fecha', fecha);
+            params.append('Hora', hora);
+            params.append('GPS', gpsCoords);
+            params.append('Foto', fotoBase64);
+            if (tipoJornada === 'Salida') {
+                params.append('NombreProyecto', projectName);
+                params.append('DescripcionTrabajo', projectDescription);
+                // Calcular horas trabajadas al registrar la salida
+                if (horaEntrada[employeeName]) {
+                    const horaSalida = new Date();
+                    const entradaTime = new Date(horaEntrada[employeeName]);
+                    const diferenciaMs = horaSalida.getTime() - entradaTime.getTime();
+                    const diferenciaHoras = Math.floor(diferenciaMs / (1000 * 60 * 60));
+                    const diferenciaMinutos = Math.floor((diferenciaMs % (1000 * 60 * 60)) / (1000 * 60));
+                    params.append('HorasTrabajadas', `${diferenciaHoras}:${diferenciaMinutos < 10 ? '0' : ''}${diferenciaMinutos}`);
+                    delete horaEntrada[employeeName]; // Limpiar hora de entrada
+                }
+            } else if (tipoJornada === 'Entrada') {
+                horaEntrada[employeeName] = new Date().toISOString(); // Registrar hora de entrada
+            }
+
+            fetch('TU_URL_DE_GOOGLE_APPS_SCRIPT', { method: 'POST', body: params })
+                .then(response => response.json())
+                .then(data => {
+                    outputSection.textContent += `Registro para ${employeeName}: ${data.message}\n`;
+                })
+                .catch(error => {
+                    outputSection.textContent += `Error al registrar a ${employeeName}: ${error.message}\n`;
+                });
+        });
+    }, () => {
+        alert('No se pudo obtener la ubicación.');
+        // Registrar sin ubicación si falla la geolocalización
+        selectedEmployees.forEach(employeeName => {
+            const params = new URLSearchParams();
+            params.append('Nombre', employeeName);
+            params.append('TipoJornada', tipoJornada);
+            params.append('Fecha', fecha);
+            params.append('Hora', hora);
+            params.append('GPS', 'Ubicación no disponible');
+            params.append('Foto', fotoBase64);
+            if (tipoJornada === 'Salida') {
+                params.append('NombreProyecto', projectName);
+                params.append('DescripcionTrabajo', projectDescription);
+                if (horaEntrada[employeeName]) {
+                    const horaSalida = new Date();
+                    const entradaTime = new Date(horaEntrada[employeeName]);
+                    const diferenciaMs = horaSalida.getTime() - entradaTime.getTime();
+                    const diferenciaHoras = Math.floor(diferenciaMs / (1000 * 60 * 60));
+                    const diferenciaMinutos = Math.floor((diferenciaMs % (1000 * 60 * 60)) / (1000 * 60));
+                    params.append('HorasTrabajadas', `${diferenciaHoras}:${diferenciaMinutos < 10 ? '0' : ''}${diferenciaMinutos}`);
+                    delete horaEntrada[employeeName];
+                }
+            } else if (tipoJornada === 'Entrada') {
+                horaEntrada[employeeName] = new Date().toISOString();
+            }
+
+            fetch('https://script.google.com/macros/s/AKfycbzEbzd5_YHO_T7C22z8HCIQ1XfsDsWNcYpgOJcLUhYSMmvpff-Pb3PHKe_PuZZ7taq45A/exec', { method: 'POST', body: params })
+                .then(response => response.json())
+                .then(data => {
+                    outputSection.textContent += `Registro para ${employeeName}: ${data.message} (sin ubicación)\n`;
+                })
+                .catch(error => {
+                    outputSection.textContent += `Error al registrar a ${employeeName}: ${error.message} (sin ubicación)\n`;
+                });
+        });
+    });
+
+    // Limpiar el formulario después del registro (opcional)
+    document.querySelectorAll('input[name="empleado"]').forEach(cb => cb.checked = false);
+    document.querySelector('input[name="tipo"]:checked').checked = false;
+    projectNameInput.value = '';
+    projectDescriptionTextarea.value = '';
+    photoBase64Input.value = '';
+});
+    </script>
+</body>
+</html>
